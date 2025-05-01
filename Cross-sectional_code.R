@@ -39,10 +39,6 @@ admix_sex_age_biomarker_W5 <- merge(admix_sex, biomarker_w5_age[c("PID", "Age", 
 
 
 
-
-
-
-
 #Remove NAs
 admix_sex_age_biomarker_W5_clean <- admix_sex_age_biomarker_W5[complete.cases(admix_sex_age_biomarker_W5[, c("GFAPW5")]), ]
 sum(is.na(admix_sex_age_biomarker_W5$GFAPW5))
@@ -53,9 +49,6 @@ admix_sex_age_biomarker_W5_clean <- admix_sex_age_biomarker_W5_clean[!duplicated
 #admix_sex_age_biomarker_clean <- admix_sex_age_biomarker[complete.cases(admix_sex_age_biomarker[, c("GFAPW8")]), ]
 admix_sex_age_biomarker_clean <- merge(admix_sex_age_biomarker, sexinfo[c("PID", "Race")], by.x = "PID", by.y = "PID")
 #admix_sex_age_biomarker_clean <- admix_sex_age_biomarker_clean[!duplicated(admix_sex_age_biomarker_clean$PID), ]
-
-
-
 
 
 
@@ -91,21 +84,6 @@ merged_W5W8_allAFR_nomissing_race <- merge(merged_W5W8_allAFR_nomissing, sexinfo
 merged_W5W8_allAFR_nomissing_race <- merged_W5W8_allAFR_nomissing_race[!duplicated(merged_W5W8_allAFR_nomissing_race$PID), ]
 table(merged_W5W8_race$Race)
 mean(merged_W5W8_allAFR_nomissing_race$ptau181,na.rm =TRUE)
-
-
-# #Filter out AFR<0.1
-# merged_W5W8 <- merged_W5W8_allAFR[merged_W5W8_allAFR$AFR >= 0.1, ]
-# table(merged_W5W8_race$Race)
-##add race and count individuals
-# merged_W5W8_race <- merge(merged_W5W8, sexinfo[c("PID", "Race")], by.x = "PID", by.y = "PID")
-# merged_W5W8_race <- merged_W5W8_race[!duplicated(merged_W5W8_race$PID), ]
-# table(merged_W5W8_race$Race)
-
-# #Save total list for PCA
-# all_keep_indiv_unrel_0.9 <- data.frame(0, merged_W5W8$IID)
-# write.table(all_keep_indiv_unrel_0.9, file = "C:/Users/luwan/Desktop/UGA/KY_lab/Pheno_W5W8_combined/all_keep_indiv_unrel_0.9.txt", row.names = FALSE, col.names = FALSE, quote = FALSE)
-all_keep_indiv_unrel <- data.frame(0, merged_W5W8_allAFR_nomissing$IID)
-write.table(all_keep_indiv_unrel, file = "C:/Users/luwan/Desktop/UGA/KY_lab/Pheno_W5W8_combined/all_keep_indiv_unrel.txt", row.names = FALSE, col.names = FALSE, quote = FALSE)
 
 merged_W5W8 <- merged_W5W8_allAFR_nomissing_race
 
@@ -161,8 +139,8 @@ print(cat_biomarker)
 check_Age <- function(df,pheno,lab_pheno="pheno_name"){
   age_vs_bio <-
     ggplot(df, aes(x = Age, y = pheno)) + 
-      geom_point()+
-      labs(x = "Age", y = lab_pheno)
+    geom_point()+
+    labs(x = "Age", y = lab_pheno)
   return(age_vs_bio)}
 ptau_age <- check_Age(merged_W5W8,merged_W5W8$ptau181,lab_pheno="pTau181")
 Abeta40_age <- check_Age(merged_W5W8,merged_W5W8$Abeta40,lab_pheno="Abeta40")
@@ -238,10 +216,7 @@ log_vs_biomarker <- log_ptau_AFR + log_GFAP_AFR + log_NFlight_AFR +
 print(log_vs_biomarker)
 
 
-
-
-
-##Try combined model
+## combined model
 # model1: biomarker ~ ancestry% + sex + age
 header <- c("sampleSize","phenotype","population","pop_coef","pop_se","pop_pvalue","sex_coef","sex_se","sex_pvalue","age_coef","age_se","age_pvalue","pop_rsq","sex_rsq","age_rsq")
 write.table(t(as.data.frame(header)),file="C:/Users/luwan/Desktop/UGA/KY_lab/Pheno_W5W8_combined/RegressionResult/combinedW5W8_unrel_regression.txt",col.names = FALSE, append = TRUE,row.names = F, quote = FALSE, na = "-",sep='\t')
@@ -261,25 +236,6 @@ for (i in 15:17){
   write.table(result,file="C:/Users/luwan/Desktop/UGA/KY_lab/Pheno_W5W8_combined/RegressionResult/combinedW5W8_unrel_regression.txt",col.names = FALSE, append = TRUE,row.names = F, quote = FALSE, na = "-",sep='\t')
   pop_coef="NA"; pop_se="NA";pop_pvalue="NA";sex_coef="NA";sex_se="NA";sex_pvalue="NA";age_coef="NA";age_se="NA";age_pvalue="NA";pop_rsq <- "NA"; sex_rsq <- "NA"; age_rsq <- "NA"
 }
-
-
-## Model for categorized
-# model1: biomarker ~ ancestry% + sex + age
-header <- c("sampleSize","phenotype","population","pop_coef","pop_se","pop_pvalue","sex_coef","sex_se","sex_pvalue","age_coef","age_se","age_pvalue")
-write.table(t(as.data.frame(header)),file="C:/Users/luwan/Desktop/UGA/KY_lab/regression/Results/combinedW5W8_unrel_regression.txt",col.names = FALSE, append = TRUE,row.names = F, quote = FALSE, na = "-",sep='\t')
-for (i in 17:18){
-  sampleSize <- sum(!is.na(merged_W5W8[,i]))
-  fitModel <- glm(unlist(merged_W5W8[,i])~AFR+gsex+Age,data=merged_W5W8,family = "binomial")
-  ml_summary <- summary(fitModel)
-  pop_coef <- ml_summary$coefficients[2,1]; pop_se <- ml_summary$coefficients[2,2]; pop_pvalue <- ml_summary$coefficients[2,4]
-  sex_coef <- ml_summary$coefficients[3,1]; sex_se <- ml_summary$coefficients[3,2]; sex_pvalue <- ml_summary$coefficients[3,4]
-  age_coef <- ml_summary$coefficients[4,1]; age_se <- ml_summary$coefficients[4,2]; age_pvalue <- ml_summary$coefficients[4,4]
-  result <- t(as.data.frame(c(sampleSize,colnames(merged_W5W8[i]),"AFR",pop_coef,pop_se,pop_pvalue,sex_coef,sex_se,sex_pvalue,age_coef,age_se,age_pvalue)))
-  write.table(result,file="C:/Users/luwan/Desktop/UGA/KY_lab/Regression/results/combinedW5W8_unrel_regression.txt",col.names = FALSE, append = TRUE,row.names = F, quote = FALSE, na = "-",sep='\t')
-  pop_coef="NA"; pop_se="NA";pop_pvalue="NA";sex_coef="NA";sex_se="NA";sex_pvalue="NA";age_coef="NA";age_se="NA";age_pvalue="NA";pop_rsq <- "NA"; sex_rsq <- "NA"; age_rsq <- "NA"
-}
-
-
 
 
 
@@ -307,33 +263,6 @@ wilcox.test(top90_EUR$Abeta40, top90_AFR$Abeta40, paired = FALSE)
 wilcox.test(top90_EUR$Abeta42, top90_AFR$Abeta42, paired = FALSE)
 wilcox.test(top90_EUR$GFAP, top90_AFR$GFAP, paired = FALSE)
 wilcox.test(top90_EUR$NFlight, top90_AFR$NFlight, paired = FALSE)
-
-#Plot Beeswarm
-#install.packages("beeswarm")
-library(beeswarm)
-
-# Bee swarm plot by group
-pTau181_bee <- beeswarm(ptau181 ~ pop,
-           data = combined_top90,
-           pch = 19, 
-           pwcol = gsex)
-Abeta40_bee <-  beeswarm(Abeta40 ~ pop,
-           data = combined_top90,
-           pch = 19, 
-           pwcol = gsex)
-Abeta42_bee <-  beeswarm(Abeta42 ~ pop,
-           data = combined_top90,
-           pch = 19, 
-           pwcol = gsex)
-GFAPW8_bee <-  beeswarm(GFAP ~ pop,
-           data = combined_top90,
-           pch = 19, 
-           pwcol = gsex)
-NFl_bee <-  beeswarm(NFlight ~ pop,
-           data = combined_top90,
-           pch = 19, 
-           pwcol = gsex)
-
 
 
 library(ggstatsplot)
@@ -370,7 +299,7 @@ wilcox_pTau <- ggbetweenstats( # independent samples
   centrality.plotting = FALSE, # remove median,
   results.subtitle = FALSE
   #ggplot.component = list(geom_point(aes(color = gsex), position = position_jitterdodge())) # Add dots colored by sex
-  )+ 
+)+ 
   theme(
     axis.title.x = element_text(size = 14), # Adjust x-axis title font size
     axis.title.y = element_text(size = 14), # Adjust y-axis title font size
@@ -382,22 +311,7 @@ wilcox_pTau <- ggbetweenstats( # independent samples
     y = "pTau-181 level"                   # Customize y-axis title
   )+
   ggtitle(label = NULL, subtitle = custom.ptau)
-# wilcox_abeta40 <- ggbetweenstats( # independent samples
-#   data = combined_top90,
-#   x = pop,
-#   y = Abeta40,
-#   plot.type = "box", # for boxplot
-#   type = "nonparametric", # for wilcoxon
-#   centrality.plotting = FALSE # remove median
-# )
-# wilcox_abeta42 <- ggbetweenstats( # independent samples
-#   data = combined_top90,
-#   x = pop,
-#   y = Abeta42,
-#   plot.type = "box", # for boxplot
-#   type = "nonparametric", # for wilcoxon
-#   centrality.plotting = FALSE # remove median
-# )
+
 wilcox_GFAP <- ggbetweenstats( # independent samples
   data = combined_top90,
   x = pop,
@@ -502,7 +416,7 @@ Model1binary_AFREUR(combined_top90, 17, 18, "C:/Users/luwan/Desktop/UGA/KY_lab/R
 
 ##save df for SNP association and APOE4 status analysis
 #pheno
-pheno_data <- data.frame(0,merged_W5W8$IID,merged_W5W8$ptau181,merged_W5W8$Abeta40,merged_W5W8$Abeta42,merged_W5W8$GFAP,merged_W5W8$NFlight)
+pheno_data <- data.frame(0,merged_W5W8$IID,merged_W5W8$log_pTau181,merged_W5W8$Abeta40,merged_W5W8$Abeta42,merged_W5W8$log_GFAP,merged_W5W8$log_NFlight)
 colnames(pheno_data) <- c("FID","IID", "ptau","ab40","ab42","gfap","nfl")
 #covar
 PC1_20<-read.table("C:/Users/luwan/Desktop/UGA/KY_lab/Pheno_W5W8_combined/PCA/W5W8_PCA.eigenvec",header=FALSE,sep=" ")
@@ -510,19 +424,19 @@ covar_data <- merge(merged_W5W8[c("IID", "Age", "gsex")],PC1_20, by.x = "IID", b
 covar_data <- covar_data[, c("V1", setdiff(names(covar_data), "V1"))]
 colnames(covar_data) <- c("FID","IID", "age","sex","PC1","PC2","PC3","PC4","PC5","PC6","PC7","PC8","PC9","PC10","PC11","PC12","PC13","PC14","PC15","PC16","PC17","PC18","PC19","PC20")
 
-write.table(pheno_data,file="C:/Users/luwan/Desktop/UGA/KY_lab/Pheno_W5W8_combined/biomarker_data_for_SNPassociation.txt",col.names = TRUE, append = TRUE,row.names = F, quote = FALSE, na = "-",sep='\t')
+write.table(pheno_data,file="C:/Users/luwan/Desktop/UGA/KY_lab/Pheno_W5W8_combined/biomarker_data_for_SNPassociation_n573.txt",col.names = TRUE, append = TRUE,row.names = F, quote = FALSE, na = "-",sep='\t')
 write.table(covar_data,file="C:/Users/luwan/Desktop/UGA/KY_lab/Pheno_W5W8_combined/covar_PC_for_SNPassociation.txt",col.names = TRUE, append = TRUE,row.names = F, quote = FALSE, na = "-",sep='\t')
 
 #Plot PC
 PC12 <- ggplot(covar_data, aes(x = PC1, y = PC2)) + 
   geom_point()
-  labs(x = "PC1", y = "PC2")
+labs(x = "PC1", y = "PC2")
 PC34 <- ggplot(covar_data, aes(x = PC3, y = PC4)) + 
   geom_point()
-  labs(x = "PC3", y = "PC4")
+labs(x = "PC3", y = "PC4")
 PC56 <- ggplot(covar_data, aes(x = PC5, y = PC6)) + 
   geom_point()
-  labs(x = "PC5", y = "PC6")
+labs(x = "PC5", y = "PC6")
 PC78 <- ggplot(covar_data, aes(x = PC7, y = PC8)) + 
   geom_point()
 PC910 <- ggplot(covar_data, aes(x = PC9, y = PC10)) + 
@@ -547,24 +461,20 @@ print(PC_plot)
 ### APOE4 regression
 APOE4_data <- read.table("C:/Users/luwan/Desktop/UGA/KY_lab/Pheno_W5W8_combined/APOE4/APOE4_status_pheno_data.txt",header=T,sep="\t")
 APOE4_data_biomarker <- merge(merged_W5W8, APOE4_data[c("IID", "APOE4")], by.x = "IID", by.y = "IID")
-header <- c("sampleSize","phenotype","APOE_coef","APOE_se","APOE_pvalue","sex_coef","sex_se","sex_pvalue","age_coef","age_se","age_pvalue","APOE_rsq","sex_rsq","age_rsq")
-write.table(t(as.data.frame(header)),file="C:/Users/luwan/Desktop/UGA/KY_lab/Pheno_W5W8_combined/APOE4/APOE4_regression_clean.txt",col.names = FALSE, append = TRUE,row.names = F, quote = FALSE, na = "-",sep='\t')
-for (i in 17:18){
-  sampleSize <- sum(!is.na(APOE4_data_biomarker[,i]) & !is.nan(APOE4_data_biomarker[,i]))
-  fitModel <- glm(unlist(APOE4_data_biomarker[,i])~APOE4+gsex+Age,data=APOE4_data_biomarker,family="binomial")
-  ml_summary <- summary(fitModel)
-  APOE_coef <- ml_summary$coefficients[2,1]; APOE_se <- ml_summary$coefficients[2,2]; APOE_pvalue <- ml_summary$coefficients[2,4]
-  sex_coef <- ml_summary$coefficients[3,1]; sex_se <- ml_summary$coefficients[3,2]; sex_pvalue <- ml_summary$coefficients[3,4]
-  age_coef <- ml_summary$coefficients[4,1]; age_se <- ml_summary$coefficients[4,2]; age_pvalue <- ml_summary$coefficients[4,4]
-  result <- as.data.frame(t(as.data.frame(c(sampleSize,colnames(APOE4_data_biomarker[i]),APOE_coef,APOE_se,APOE_pvalue,sex_coef,sex_se,sex_pvalue,age_coef,age_se,age_pvalue,APOE_rsq,sex_rsq,age_rsq))))
-  write.table(result,file="C:/Users/luwan/Desktop/UGA/KY_lab/Pheno_W5W8_combined/APOE4/APOE4_regression.txt",col.names = FALSE, append = TRUE,row.names = F, quote = FALSE, na = "-",sep='\t')
-  APOE_coef="NA"; APOE_se="NA";APOE_pvalue="NA";sex_coef="NA";sex_se="NA";sex_pvalue="NA";age_coef="NA";age_se="NA";age_pvalue="NA";APOE_rsq <- "NA"; sex_rsq <- "NA"; age_rsq <- "NA"
-}
+
+
+#Read in PCA data
+# PCA_ID <- read.table("C:/Users/luwan/Desktop/UGA/KY_lab/Pheno_W5W8_combined/GT_for_PCA/W5W8_indiv_unrel_AFR0.9.fam",header=F,sep=" ")
+PCA_data <- read.table("C:/Users/luwan/Desktop/UGA/KY_lab/Pheno_W5W8_combined/PCA/W5W8_PCA.eigenvec",header=F,sep=" ")
+colnames(PCA_data) <- c("FID", "IID", "sex","age","PC1","PC2","PC3","PC4","PC5","PC6","PC7","PC8","PC9","PC10")
+APOE4_data_biomarker <- merge(APOE4_data_biomarker, PCA_data[c("IID", "PC1","PC2","PC3","PC4")], by.x = "IID", by.y = "IID")
+
+i=17
 header <- c("sampleSize","phenotype","APOE_coef","APOE_se","APOE_pvalue","sex_coef","sex_se","sex_pvalue","age_coef","age_se","age_pvalue","APOE_rsq","sex_rsq","age_rsq")
 write.table(t(as.data.frame(header)),file="C:/Users/luwan/Desktop/UGA/KY_lab/Pheno_W5W8_combined/APOE4/APOE4_regression_clean.txt",col.names = FALSE, append = TRUE,row.names = F, quote = FALSE, na = "-",sep='\t')
 for (i in 15:17){
   sampleSize <- sum(!is.na(APOE4_data_biomarker[,i]) & !is.nan(APOE4_data_biomarker[,i]))
-  fitModel <- glm(unlist(APOE4_data_biomarker[,i])~APOE4+gsex+Age,data=APOE4_data_biomarker)
+  fitModel <- glm(unlist(APOE4_data_biomarker[,i])~APOE4+gsex+Age+PC1+PC2+PC3+PC4,data=APOE4_data_biomarker)
   ml_summary <- summary(fitModel)
   APOE_coef <- ml_summary$coefficients[2,1]; APOE_se <- ml_summary$coefficients[2,2]; APOE_pvalue <- ml_summary$coefficients[2,4]
   sex_coef <- ml_summary$coefficients[3,1]; sex_se <- ml_summary$coefficients[3,2]; sex_pvalue <- ml_summary$coefficients[3,4]
@@ -581,143 +491,6 @@ for (i in 15:17){
 
 
 
-
-
-# #####try age*AFR% interaction term (expect ptau to be significant)
-# header <- c("sampleSize","phenotype","APOE_coef","APOE_se","APOE_pvalue","sex_coef","sex_se","sex_pvalue","age_coef","age_se","age_pvalue","APOE_rsq","sex_rsq","age_rsq")
-# write.table(t(as.data.frame(header)),file="C:/Users/luwan/Desktop/UGA/KY_lab/Pheno_W5W8_combined/APOE4/APOE4_regression.txt",col.names = FALSE, append = TRUE,row.names = F, quote = FALSE, na = "-",sep='\t')
-# for (i in 17:18){
-#   sampleSize <- sum(!is.na(APOE4_data_biomarker[,i]) & !is.nan(APOE4_data_biomarker[,i]))
-#   fitModel <- glm(unlist(APOE4_data_biomarker[,i])~APOE4+gsex+Age,data=APOE4_data_biomarker,family="binomial")
-#   ml_summary <- summary(fitModel)
-#   APOE_coef <- ml_summary$coefficients[2,1]; APOE_se <- ml_summary$coefficients[2,2]; APOE_pvalue <- ml_summary$coefficients[2,4]
-#   sex_coef <- ml_summary$coefficients[3,1]; sex_se <- ml_summary$coefficients[3,2]; sex_pvalue <- ml_summary$coefficients[3,4]
-#   age_coef <- ml_summary$coefficients[4,1]; age_se <- ml_summary$coefficients[4,2]; age_pvalue <- ml_summary$coefficients[4,4]
-#   result <- as.data.frame(t(as.data.frame(c(sampleSize,colnames(APOE4_data_biomarker[i]),APOE_coef,APOE_se,APOE_pvalue,sex_coef,sex_se,sex_pvalue,age_coef,age_se,age_pvalue,APOE_rsq,sex_rsq,age_rsq))))
-#   write.table(result,file="C:/Users/luwan/Desktop/UGA/KY_lab/Pheno_W5W8_combined/APOE4/APOE4_regression.txt",col.names = FALSE, append = TRUE,row.names = F, quote = FALSE, na = "-",sep='\t')
-#   APOE_coef="NA"; APOE_se="NA";APOE_pvalue="NA";sex_coef="NA";sex_se="NA";sex_pvalue="NA";age_coef="NA";age_se="NA";age_pvalue="NA";APOE_rsq <- "NA"; sex_rsq <- "NA"; age_rsq <- "NA"
-# }
-# 
-# header <- c("sampleSize","phenotype","population","pop_coef","pop_se","pop_pvalue","sex_coef","sex_se","sex_pvalue","age_coef","age_se","age_pvalue","axa_coeff", "axa_se", "axa_pvalue", "pop_rsq","sex_rsq","age_rsq", "axa_rsq")
-# write.table(t(as.data.frame(header)),file="C:/Users/luwan/Desktop/UGA/KY_lab/Pheno_W5W8_combined/AFR_age_interaction_model.txt",col.names = FALSE, append = TRUE,row.names = F, quote = FALSE, na = "-",sep='\t')
-# for (i in 14:16){
-#   sampleSize <- sum(!is.na(merged_W5W8[,i]) & !is.nan(merged_W5W8[,i]))
-#   fitModel <- glm(unlist(merged_W5W8[,i])~AFR+gsex+Age+AFR*Age,data=merged_W5W8)
-#   ml_summary <- summary(fitModel)
-#   pop_coef <- ml_summary$coefficients[2,1]; pop_se <- ml_summary$coefficients[2,2]; pop_pvalue <- ml_summary$coefficients[2,4]
-#   sex_coef <- ml_summary$coefficients[3,1]; sex_se <- ml_summary$coefficients[3,2]; sex_pvalue <- ml_summary$coefficients[3,4]
-#   age_coef <- ml_summary$coefficients[4,1]; age_se <- ml_summary$coefficients[4,2]; age_pvalue <- ml_summary$coefficients[4,4]
-#   axa_coef <- ml_summary$coefficients[5,1]; axa_se <- ml_summary$coefficients[5,2]; axa_pvalue <- ml_summary$coefficients[5,4]
-#   rsqValue <- rsq.partial(fitModel, adj = TRUE)
-#   pop_rsq <- rsqValue$partial.rsq[1]
-#   sex_rsq <- rsqValue$partial.rsq[2]
-#   age_rsq <- rsqValue$partial.rsq[3]
-#   axa_rsq <- rsqValue$partial.rsq[4]
-#   result <- as.data.frame(t(as.data.frame(c(sampleSize,colnames(merged_W5W8[i]),"AFR",pop_coef,pop_se,pop_pvalue,sex_coef,sex_se,sex_pvalue,age_coef,age_se,age_pvalue,axa_coef,axa_se,axa_pvalue,pop_rsq,sex_rsq,age_rsq,axa_rsq))))
-#   write.table(result,file="C:/Users/luwan/Desktop/UGA/KY_lab/Pheno_W5W8_combined/AFR_age_interaction_model.txt",col.names = FALSE, append = TRUE,row.names = F, quote = FALSE, na = "-",sep='\t')
-# }
-# 
-# 
-# 
-# 
-# #try extreme interaction term
-# #separate populations
-# combined_sorted_1stquintile <- merged_W5W8[merged_W5W8$AFR < 0.75, ]  # Sorts the DataFrame in descending order based on 'target_column'
-# combined_sorted_5thquintile <- merged_W5W8[merged_W5W8$AFR > 0.887, ]
-# #combine the two groups and do extreme analysis
-# combined_sorted_1stquintile$pop <- "Q1"  # Sorts the DataFrame in descending order based on 'target_column'
-# combined_sorted_5thquintile$pop <- "Q5"
-# combined_sorted_quintile <- rbind(combined_sorted_1stquintile,combined_sorted_5thquintile)
-# combined_sorted_quintile$pop_cat <- ifelse(combined_sorted_quintile$pop == "Q1", "0", "1")
-# combined_sorted_quintile$pop_cat <- factor(combined_sorted_quintile$pop_cat,ordered = F,levels=c("0","1"))
-# #extrame regression
-# df=combined_sorted_quintile
-# i=9
-# sampleSize <- sum(!is.na(df[,i]) & !is.nan(df[,i]))
-# fitModel <- glm(unlist(df[,i])~pop_cat+gsex+Age+pop_cat*Age,data=df)
-# ml_summary <- summary(fitModel)
-# pop_coef <- ml_summary$coefficients[2,1]; pop_se <- ml_summary$coefficients[2,2]; pop_pvalue <- ml_summary$coefficients[2,4]
-# sex_coef <- ml_summary$coefficients[3,1]; sex_se <- ml_summary$coefficients[3,2]; sex_pvalue <- ml_summary$coefficients[3,4]
-# age_coef <- ml_summary$coefficients[4,1]; age_se <- ml_summary$coefficients[4,2]; age_pvalue <- ml_summary$coefficients[4,4]
-# axa_coef <- ml_summary$coefficients[5,1]; axa_se <- ml_summary$coefficients[5,2]; axa_pvalue <- ml_summary$coefficients[5,4]
-# rsqValue <- rsq.partial(fitModel, adj = TRUE)
-# pop_rsq <- rsqValue$partial.rsq[1]
-# sex_rsq <- rsqValue$partial.rsq[2]
-# age_rsq <- rsqValue$partial.rsq[3]
-# axa_rsq <- rsqValue$partial.rsq[4]
-# result2 <- as.data.frame(t(as.data.frame(c(sampleSize,colnames(df[i]),"AFR",pop_coef,pop_se,pop_pvalue,sex_coef,sex_se,sex_pvalue,age_coef,age_se,age_pvalue,axa_coef,axa_se,axa_pvalue,pop_rsq,sex_rsq,age_rsq,axa_rsq))))
-# colnames(result2) <- c("sampleSize","phenotype","population","pop_coef","pop_se","pop_pvalue","sex_coef","sex_se","sex_pvalue","age_coef","age_se","age_pvalue","axa_coeff", "axa_se", "axa_pvalue", "pop_rsq","sex_rsq","age_rsq", "axa_rsq")
-# 
-# #Try age in different groups
-# df=combined_sorted_1stquintile
-# sampleSize <- sum(!is.na(df[,i]) & !is.nan(df[,i]))
-# fitModel <- glm(unlist(df[,i])~gsex+Age,data=df)
-# ml_summary <- summary(fitModel)
-# sex_coef <- ml_summary$coefficients[2,1]; sex_se <- ml_summary$coefficients[2,2]; sex_pvalue <- ml_summary$coefficients[2,4]
-# age_coef <- ml_summary$coefficients[3,1]; age_se <- ml_summary$coefficients[3,2]; age_pvalue <- ml_summary$coefficients[3,4]
-# rsqValue <- rsq.partial(fitModel, adj = TRUE)
-# sex_rsq <- rsqValue$partial.rsq[1]
-# age_rsq <- rsqValue$partial.rsq[2]
-# result3 <- as.data.frame(t(as.data.frame(c(sampleSize,colnames(df[i]),sex_coef,sex_se,sex_pvalue,age_coef,age_se,age_pvalue,sex_rsq,age_rsq))))
-# colnames(result3) <- c("sampleSize","phenotype","sex_coef","sex_se","sex_pvalue","age_coef","age_se","age_pvalue","sex_rsq","age_rsq")
-# 
-# df=combined_sorted_5thquintile
-# sampleSize <- sum(!is.na(df[,i]) & !is.nan(df[,i]))
-# fitModel <- glm(unlist(df[,i])~gsex+Age,data=df)
-# ml_summary <- summary(fitModel)
-# sex_coef <- ml_summary$coefficients[2,1]; sex_se <- ml_summary$coefficients[2,2]; sex_pvalue <- ml_summary$coefficients[2,4]
-# age_coef <- ml_summary$coefficients[3,1]; age_se <- ml_summary$coefficients[3,2]; age_pvalue <- ml_summary$coefficients[3,4]
-# rsqValue <- rsq.partial(fitModel, adj = TRUE)
-# sex_rsq <- rsqValue$partial.rsq[1]
-# age_rsq <- rsqValue$partial.rsq[2]
-# result4 <- as.data.frame(t(as.data.frame(c(sampleSize,colnames(df[i]),sex_coef,sex_se,sex_pvalue,age_coef,age_se,age_pvalue,sex_rsq,age_rsq))))
-# colnames(result4) <- c("sampleSize","phenotype","sex_coef","sex_se","sex_pvalue","age_coef","age_se","age_pvalue","sex_rsq","age_rsq")
-# combined_quitile1st_5th_result <- rbind(result3,result4)
-# 
-# 
-# #check cutoffs
-# check_cutoff_for_age_beta <- function(cutoff){
-#   combined_sorted_1stquintile <- merged_W5W8[merged_W5W8$AFR < cutoff, ]  # Sorts the DataFrame in descending order based on 'target_column'
-#   combined_sorted_5thquintile <- merged_W5W8[merged_W5W8$AFR > cutoff, ]
-#   #combine the two groups and do extreme analysis
-#   #model
-#   sampleSize <- sum(!is.na(combined_sorted_1stquintile[,9]) & !is.nan(combined_sorted_1stquintile[,9]))
-#   fitModel <- glm(unlist(combined_sorted_1stquintile[,9])~gsex+Age,data=combined_sorted_1stquintile)
-#   ml_summary <- summary(fitModel)
-#   sex_coef <- ml_summary$coefficients[2,1]; sex_se <- ml_summary$coefficients[2,2]; sex_pvalue <- ml_summary$coefficients[2,4]
-#   age_coef <- ml_summary$coefficients[3,1]; age_se <- ml_summary$coefficients[3,2]; age_pvalue <- ml_summary$coefficients[3,4]
-#   rsqValue <- rsq.partial(fitModel, adj = TRUE)
-#   sex_rsq <- rsqValue$partial.rsq[1]
-#   age_rsq <- rsqValue$partial.rsq[2]
-#   result1 <- as.data.frame(t(as.data.frame(c(sampleSize,colnames(combined_sorted_1stquintile[9]),cutoff,age_coef,age_se,age_pvalue,age_rsq))))
-#   colnames(result1) <- c("sampleSize","phenotype","cutoff","age_coef","age_se","age_pvalue","age_rsq")
-#   
-#   sampleSize <- sum(!is.na(combined_sorted_5thquintile[,9]) & !is.nan(combined_sorted_5thquintile[,9]))
-#   fitModel <- glm(unlist(combined_sorted_5thquintile[,9])~gsex+Age,data=combined_sorted_5thquintile)
-#   ml_summary <- summary(fitModel)
-#   sex_coef <- ml_summary$coefficients[2,1]; sex_se <- ml_summary$coefficients[2,2]; sex_pvalue <- ml_summary$coefficients[2,4]
-#   age_coef <- ml_summary$coefficients[3,1]; age_se <- ml_summary$coefficients[3,2]; age_pvalue <- ml_summary$coefficients[3,4]
-#   rsqValue <- rsq.partial(fitModel, adj = TRUE)
-#   sex_rsq <- rsqValue$partial.rsq[1]
-#   age_rsq <- rsqValue$partial.rsq[2]
-#   result2 <- as.data.frame(t(as.data.frame(c(sampleSize,colnames(combined_sorted_5thquintile[9]),cutoff,age_coef,age_se,age_pvalue,age_rsq))))
-#   colnames(result2) <- c("sampleSize","phenotype","cutoff","age_coef","age_se","age_pvalue","age_rsq")
-#   result<-rbind(result1,result2)
-#   return(result)
-# }
-# 
-# cutoffs <- c(0.5,0.6,0.7,0.8,0.9)
-# for (j in cutoffs){
-#   result_name <- paste0("result", gsub("\\.", "", as.character(j)))  # Create a name like result05, result06, etc.
-#   assign(result_name, data.frame(check_cutoff_for_age_beta(j)))  # Assign the dataframe to the dynamically created name
-# }
-# result05<-data.frame(check_cutoff_for_age_beta(0.5))
-# result06<-data.frame(check_cutoff_for_age_beta(0.6))
-# result07<-data.frame(check_cutoff_for_age_beta(0.7))
-# result08<-data.frame(check_cutoff_for_age_beta(0.8))
-# result09<-data.frame(check_cutoff_for_age_beta(0.9))
-# 
-# result00 <- rbind(result05,result06,result07,result08,result09)
 
 
 ##PGS
@@ -765,20 +538,11 @@ print(PGS_vs_biomarker)
 
 
 #correlation
-pTau_PGS_correlation <- cor.test(df_combo_pgs$pTau_PGS, df_combo_pgs$ptau181, method = "pearson", use = "complete.obs")
-# abeta40_PGS_correlation <- cor.test(df_combo_pgs$abeta40_PGS, df_combo_pgs$Abeta40W8, method = "pearson", use = "complete.obs")
-# abeta42_PGS_correlation <- cor.test(df_combo_pgs$abeta42_PGS, df_combo_pgs$Abeta42W8, method = "pearson", use = "complete.obs")
-GFAP_PGS_correlation <- cor.test(df_combo_pgs$GFAP_PGS, df_combo_pgs$GFAP, method = "pearson", use = "complete.obs")
+pTau_PGS_correlation <- cor.test(df_combo_pgs$pTau_PGS, df_combo_pgs$ptau181, method = "pearson", use = "complete.obs")GFAP_PGS_correlation <- cor.test(df_combo_pgs$GFAP_PGS, df_combo_pgs$GFAP, method = "pearson", use = "complete.obs")
 NFL_PGS_correlation <- cor.test(df_combo_pgs$NFL_PGS, df_combo_pgs$NFlight, method = "pearson", use = "complete.obs")
 print(pTau_PGS_correlation)
-# print(abeta40_PGS_correlation)
-# print(abeta42_PGS_correlation)
 print(GFAP_PGS_correlation)
 print(NFL_PGS_correlation)
-
-
-
-
 
 
 
@@ -839,16 +603,7 @@ NFLsex <- ggplot(merged_W5W8, aes(x = gsex, y = log_NFlight, fill = gsex)) +
         text = element_text(size = 12),  # Changes global text size
         axis.title = element_text(size = 14),  # Specific size for axis titles
         axis.text = element_text(size = 12))  # Specific size for axis text
-#install.packages("ggbeeswarm")
-# library(ggbeeswarm)
-# ggplot(merged_W5W8, aes(x = gsex, y = log_GFAP, color = gsex)) +
-#   geom_quasirandom(groupOnX = TRUE) +  # This creates the beeswarm effect
-#   labs(title = "Distribution of Biomarker Levels by Gender",
-#        x = "Gender",
-#        y = "Biomarker Level") +
-#   theme_minimal() +
-#   scale_color_brewer(palette = "Set1")
-# PGS_vs_biomarker <- pTau181_W8_PGS + Abeta40W8_PGS + Abeta42W8_PGS + GFAPW8_PGS + NFlightW8_PGS +
+
 sex_vs_biomarker <- ptausex_sig + GFAPsex_sig + NFLsex +
   plot_layout(guides = 'collect') + # Optional: collect all legends into one
   plot_annotation(
@@ -858,3 +613,78 @@ sex_vs_biomarker <- ptausex_sig + GFAPsex_sig + NFLsex +
   )
 print(sex_vs_biomarker)
 
+
+
+
+
+##############-------------------------------------
+####Try divide APOE4 carrier (>0) and non-carrier and redo regression
+APOE4_data_biomarker_0 <- APOE4_data_biomarker %>% filter(APOE4 == 0)
+APOE4_data_biomarker_carrier <- APOE4_data_biomarker %>% filter(APOE4 > 0)
+# model1: biomarker ~ ancestry% + sex + age
+header <- c("sampleSize","phenotype","population","pop_coef","pop_se","pop_pvalue","sex_coef","sex_se","sex_pvalue","age_coef","age_se","age_pvalue","pop_rsq","sex_rsq","age_rsq")
+write.table(t(as.data.frame(header)),file="C:/Users/luwan/Desktop/UGA/KY_lab/Regression/results/APOE4carrier_regression.txt",col.names = FALSE, append = TRUE,row.names = F, quote = FALSE, na = "-",sep='\t')
+for (i in 15:17){
+  sampleSize <- sum(!is.na(APOE4_data_biomarker_0[,i]))
+  fitModel <- glm(unlist(APOE4_data_biomarker_0[,i])~AFR+gsex+Age,data=APOE4_data_biomarker_0)#,family = "binomial")
+  ml_summary <- summary(fitModel)
+  pop_coef <- ml_summary$coefficients[2,1]; pop_se <- ml_summary$coefficients[2,2]; pop_pvalue <- ml_summary$coefficients[2,4]
+  sex_coef <- ml_summary$coefficients[3,1]; sex_se <- ml_summary$coefficients[3,2]; sex_pvalue <- ml_summary$coefficients[3,4]
+  age_coef <- ml_summary$coefficients[4,1]; age_se <- ml_summary$coefficients[4,2]; age_pvalue <- ml_summary$coefficients[4,4]
+  rsqValue <- rsq.partial(fitModel, adj = TRUE)
+  pop_rsq <- rsqValue$partial.rsq[1]
+  sex_rsq <- rsqValue$partial.rsq[2]
+  age_rsq <- rsqValue$partial.rsq[3]
+  result <- t(as.data.frame(c(sampleSize,colnames(APOE4_data_biomarker_0[i]),"AFR",pop_coef,pop_se,pop_pvalue,sex_coef,sex_se,sex_pvalue,age_coef,age_se,age_pvalue,pop_rsq,sex_rsq,age_rsq)))
+  # write.table(result,file="C:/Users/luwan/Desktop/UGA/KY_lab/Regression/results/combinedW5W8_unrel_regression.txt",col.names = FALSE, append = TRUE,row.names = F, quote = FALSE, na = "-",sep='\t')
+  write.table(result,file="C:/Users/luwan/Desktop/UGA/KY_lab/Regression/results/APOE4carrier_regression.txt",col.names = FALSE, append = TRUE,row.names = F, quote = FALSE, na = "-",sep='\t')
+  pop_coef="NA"; pop_se="NA";pop_pvalue="NA";sex_coef="NA";sex_se="NA";sex_pvalue="NA";age_coef="NA";age_se="NA";age_pvalue="NA";pop_rsq <- "NA"; sex_rsq <- "NA"; age_rsq <- "NA"
+}
+#carrier
+header <- c("sampleSize","phenotype","population","pop_coef","pop_se","pop_pvalue","sex_coef","sex_se","sex_pvalue","age_coef","age_se","age_pvalue","pop_rsq","sex_rsq","age_rsq")
+write.table(t(as.data.frame(header)),file="C:/Users/luwan/Desktop/UGA/KY_lab/Regression/results/APOE4carrier_regression.txt",col.names = FALSE, append = TRUE,row.names = F, quote = FALSE, na = "-",sep='\t')
+for (i in 15:17){
+  sampleSize <- sum(!is.na(APOE4_data_biomarker_carrier[,i]))
+  fitModel <- glm(unlist(APOE4_data_biomarker_carrier[,i])~AFR+gsex+Age,data=APOE4_data_biomarker_carrier)#,family = "binomial")
+  ml_summary <- summary(fitModel)
+  pop_coef <- ml_summary$coefficients[2,1]; pop_se <- ml_summary$coefficients[2,2]; pop_pvalue <- ml_summary$coefficients[2,4]
+  sex_coef <- ml_summary$coefficients[3,1]; sex_se <- ml_summary$coefficients[3,2]; sex_pvalue <- ml_summary$coefficients[3,4]
+  age_coef <- ml_summary$coefficients[4,1]; age_se <- ml_summary$coefficients[4,2]; age_pvalue <- ml_summary$coefficients[4,4]
+  rsqValue <- rsq.partial(fitModel, adj = TRUE)
+  pop_rsq <- rsqValue$partial.rsq[1]
+  sex_rsq <- rsqValue$partial.rsq[2]
+  age_rsq <- rsqValue$partial.rsq[3]
+  result <- t(as.data.frame(c(sampleSize,colnames(APOE4_data_biomarker_carrier[i]),"AFR",pop_coef,pop_se,pop_pvalue,sex_coef,sex_se,sex_pvalue,age_coef,age_se,age_pvalue,pop_rsq,sex_rsq,age_rsq)))
+  # write.table(result,file="C:/Users/luwan/Desktop/UGA/KY_lab/Regression/results/combinedW5W8_unrel_regression.txt",col.names = FALSE, append = TRUE,row.names = F, quote = FALSE, na = "-",sep='\t')
+  write.table(result,file="C:/Users/luwan/Desktop/UGA/KY_lab/Regression/results/APOE4carrier_regression.txt",col.names = FALSE, append = TRUE,row.names = F, quote = FALSE, na = "-",sep='\t')
+  pop_coef="NA"; pop_se="NA";pop_pvalue="NA";sex_coef="NA";sex_se="NA";sex_pvalue="NA";age_coef="NA";age_se="NA";age_pvalue="NA";pop_rsq <- "NA"; sex_rsq <- "NA"; age_rsq <- "NA"
+}
+
+##Interaction term
+header <- c("sampleSize","phenotype","population","pop_coef","pop_se","pop_pvalue","sex_coef","sex_se","sex_pvalue","age_coef","age_se","age_pvalue","APOE4_coef","APOE4_se","APOE4_pvalue","AFRxAPOE4_coef","AFRxAPOE4_se","AFRxAPOE4_pvalue","pop_rsq","sex_rsq","age_rsq","APOE4_rsq","AFRxAPOE4_rsq")
+write.table(t(as.data.frame(header)),file="C:/Users/luwan/Desktop/UGA/KY_lab/Regression/results/APOE4interaction_regression.txt",col.names = FALSE, append = TRUE,row.names = F, quote = FALSE, na = "-",sep='\t')
+for (i in 15:17){
+  sampleSize <- sum(!is.na(APOE4_data_biomarker[,i]))
+  fitModel <- glm(unlist(APOE4_data_biomarker[,i])~AFR+gsex+Age+APOE4+AFR*APOE4,data=APOE4_data_biomarker)#,family = "binomial")
+  ml_summary <- summary(fitModel)
+  pop_coef <- ml_summary$coefficients[2,1]; pop_se <- ml_summary$coefficients[2,2]; pop_pvalue <- ml_summary$coefficients[2,4]
+  sex_coef <- ml_summary$coefficients[3,1]; sex_se <- ml_summary$coefficients[3,2]; sex_pvalue <- ml_summary$coefficients[3,4]
+  age_coef <- ml_summary$coefficients[4,1]; age_se <- ml_summary$coefficients[4,2]; age_pvalue <- ml_summary$coefficients[4,4]
+  APOE4_coef <- ml_summary$coefficients[5,1]; APOE4_se <- ml_summary$coefficients[5,2]; APOE4_pvalue <- ml_summary$coefficients[5,4]
+  AFRxAPOE4_coef <- ml_summary$coefficients[6,1]; AFRxAPOE4_se <- ml_summary$coefficients[6,2]; AFRxAPOE4_pvalue <- ml_summary$coefficients[6,4]
+  rsqValue <- rsq.partial(fitModel, adj = TRUE)
+  pop_rsq <- rsqValue$partial.rsq[1]
+  sex_rsq <- rsqValue$partial.rsq[2]
+  age_rsq <- rsqValue$partial.rsq[3]
+  APOE4_rsq <- rsqValue$partial.rsq[4]
+  AFRxAPOE4_rsq <- rsqValue$partial.rsq[5]
+  result <- t(as.data.frame(c(sampleSize,colnames(APOE4_data_biomarker[i]),"AFR",pop_coef,pop_se,pop_pvalue,sex_coef,sex_se,sex_pvalue,age_coef,age_se,age_pvalue,APOE4_coef,APOE4_se,APOE4_pvalue,AFRxAPOE4_coef,AFRxAPOE4_se,AFRxAPOE4_pvalue,pop_rsq,sex_rsq,age_rsq,APOE4_rsq,AFRxAPOE4_rsq)))
+  write.table(result,file="C:/Users/luwan/Desktop/UGA/KY_lab/Regression/results/APOE4interaction_regression.txt",col.names = FALSE, append = TRUE,row.names = F, quote = FALSE, na = "-",sep='\t')
+  pop_coef="NA"; pop_se="NA";pop_pvalue="NA";sex_coef="NA";sex_se="NA";sex_pvalue="NA";age_coef="NA";age_se="NA";age_pvalue="NA";pop_rsq <- "NA"; sex_rsq <- "NA"; age_rsq <- "NA"
+}
+
+##compare ANOVA interaction term
+APOE4_ptau_anova <- lm(log_pTau181 ~ AFR + APOE4 + gsex + Age,data = APOE4_data_biomarker)
+APOE4_ptau_ixn_anova <- lm(log_pTau181 ~ AFR + APOE4 + gsex + Age + AFR*APOE4,data = APOE4_data_biomarker)
+summary(APOE4_ptau_ixn_anova)
+anova(APOE4_ptau_anova,APOE4_ptau_ixn_anova)

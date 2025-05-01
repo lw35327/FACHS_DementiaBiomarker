@@ -5,4 +5,4 @@ R code used to generate main figures: [Plotting_Fig1and2.R](https://github.com/l
 
 R code used to extract APOE genotype in our cohort: [ExtractAPOEgeno.R](https://github.com/lw35327/FACHS_DementiaBiomarker/blob/main/ExtractAPOEgeno.R).
 
-R code used to calculate relatedness of individuals and remove related individuals for regression analysis:[remove_kinship.R](https://github.com/lw35327/FACHS_DementiaBiomarker/blob/main/remove_kinship.R).
+R code used to calculate relatedness of individuals and remove related individuals for regression analysis: [remove_kinship.R](https://github.com/lw35327/FACHS_DementiaBiomarker/blob/main/remove_kinship.R).
